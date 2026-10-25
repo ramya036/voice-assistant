@@ -1,0 +1,9 @@
+SpeechRecognition
+PyAudio
+pyttsx3
+wikipedia
+wolframalpha
+pyjokes
+requests
+beautifulsoup4
+pywin32
