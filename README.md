@@ -1,4 +1,4 @@
-# Virtual Web Assistant
+# Voice Assistant
 
 A voice-controlled personal assistant for Windows. Speak a command and it answers out loud or acts on it: open websites, search Wikipedia, find places on a map, check the weather, tell the time, tell jokes and more.
 
