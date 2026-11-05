@@ -1,34 +1,71 @@
 # Voice Assistant
 
-A voice-controlled personal assistant for Windows. Speak a command and it answers out loud or acts on it: open websites, search Wikipedia, find places on a map, check the weather, tell the time, tell jokes and more.
+Lisa is a voice assistant that listens for spoken commands and answers out loud: open websites, search Wikipedia, find places on a map, check the weather, play music, tell the time or tell a joke. It runs on Windows, macOS and Linux, and has a typing mode for when there's no microphone.
 
-![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
-![Windows](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
+![Speech Recognition](https://img.shields.io/badge/Speech-Recognition-4285F4)
+![Platforms](https://img.shields.io/badge/Windows%20%7C%20macOS%20%7C%20Linux-555)
+![CI](https://github.com/ramya036/voice-assistant/actions/workflows/ci.yml/badge.svg)
+
+![A typed session with Lisa](docs/demo.png)
+
+## Features
+
+| Say | Lisa |
+|---|---|
+| "What's the time?" / "What's the date?" | Tells you |
+| "Open YouTube" (also Google, Gmail, GitHub, LinkedIn, Maps) | Opens the site |
+| "Who is Ada Lovelace?" / "Search Wikipedia for Alan Turing" | Reads a two-sentence summary |
+| "Where is Georgia State University?" | Opens it on Google Maps |
+| "What's the weather in Seattle?" | Reads current conditions |
+| "Play lo-fi beats" | Opens it on YouTube Music |
+| "Search for best pizza near me" | Opens Google results |
+| "Tell me a joke" | Tells a programming joke |
+| "Ok bye" | Says goodbye and stops |
 
 ## How it works
 
-1. **Listens** through the microphone with `SpeechRecognition` and PyAudio.
-2. **Understands** the command by matching keywords in the recognized text.
-3. **Acts:** opens sites with `webbrowser`, searches Wikipedia, opens Google Maps for a place, tells jokes with `pyjokes`, and more.
-4. **Speaks** the answer back with `pyttsx3`.
-
-## Demo
-
-| Command | Result |
-|---|---|
-| Open YouTube | ![Opening YouTube](https://github.com/vyshnavi1402/Virtual-Web-Assistant/assets/108367765/7b38c558-5e8c-433e-a46d-523613cb6bd6) |
-| Search Wikipedia | ![Wikipedia search](https://github.com/vyshnavi1402/Virtual-Web-Assistant/assets/108367765/f0a3b861-12e1-4f6d-8092-6f026bbea041) |
-| Find a location | ![Map location](https://github.com/vyshnavi1402/Virtual-Web-Assistant/assets/108367765/d8cff31f-da1b-46e1-8bf6-02ae205f817e) |
-| Weather forecast | ![Weather](https://github.com/vyshnavi1402/Virtual-Web-Assistant/assets/108367765/11692383-5205-47c0-b92d-536ee97d8479) |
-| Current time | ![Time](https://github.com/vyshnavi1402/Virtual-Web-Assistant/assets/108367765/13a65c18-80c4-4b16-b448-d9d8baa3cd83) |
-
-## Run it (Windows)
-
-```bash
-pip install -r requirements.txt
-python code.py
+```
+ microphone ─► SpeechRecognition (Google) ─┐
+ keyboard (--text) ────────────────────────┤
+                                           ▼
+                     commands.parse()  "where is Atlanta" → Intent("locate", "Atlanta")
+                                           ▼
+                     commands.respond() → Response(say=..., open_url=...)
+                                           ▼
+              pyttsx3 speaks the reply   ·   browser opens the URL
 ```
 
-## Tech
+`commands.py` holds all the understanding and decision logic with no audio or browser code. Each command is a regular-expression rule, checked in order so specific commands ("what is the time") win over general questions ("what is X"). The clock, Wikipedia, jokes and weather are passed in as functions, which keeps the logic fast to test.
 
-Python · SpeechRecognition · PyAudio · pyttsx3 · Wikipedia API · pyjokes · BeautifulSoup · Requests
+## Run it
+
+```bash
+git clone https://github.com/ramya036/voice-assistant.git
+cd voice-assistant
+pip install -r requirements.txt
+
+python assistant.py          # talk to Lisa
+python assistant.py --text   # type commands instead
+python assistant.py --mute   # print replies instead of speaking them
+```
+
+Speech recognition, Wikipedia and weather need an internet connection. On macOS or Linux, PyAudio may need `brew install portaudio` or `sudo apt install portaudio19-dev` first, and Linux text-to-speech uses `espeak` (`sudo apt install espeak`).
+
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+25 tests cover how each phrase is understood, rule priority, replies for every command, time-of-day greetings, safe URL building, and graceful failures when Wikipedia or the weather service is unreachable. GitHub Actions runs them on Windows, macOS and Linux.
+
+## Project structure
+
+| File | Description |
+|---|---|
+| `commands.py` | Understands commands and builds replies, with no audio or browser code |
+| `assistant.py` | Microphone, speech output, browser and the main loop |
+| `tests/` | pytest suite |
+| `docs/demo.png` | Example session |
